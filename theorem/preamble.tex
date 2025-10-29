@@ -1,0 +1,202 @@
+\usetheme{Madrid}
+\useoutertheme{miniframes} 
+\useinnertheme{circles}
+
+\hypersetup{pdfpagemode=FullScreen}
+%\setbeameroption{show notes}
+%\setbeameroption{show notes on second screen=right}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+
+
+\author[Krzysztof Borkowski]{dr inż. Krzysztof Borkowski}
+\institute[tu.kielce.pl]{Politechnika Świętokrzyska \\  Wydział Mechatroniki i Budowy Maszyn \\ Katedra Automatyki i Robotyki} 
+\date[2025/2026]{Rok akademicki 2025/2026} 
+
+
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+\DeclareMathAlphabet{\mathbfit}{OML}{cmm}{b}{it}
+
+\DeclareMathAlphabet{\mathsca}{OML}{cmm}{m}{it}
+\DeclareMathAlphabet{\mathvec}{OML}{cmm}{b}{it}
+\DeclareMathAlphabet{\mathvech}{OT1}{cmr}{b}{it}
+\DeclareMathAlphabet{\mathmatrix}{OT1}{cmss}{bx}{it}
+\DeclareMathAlphabet{\mathname}{OT1}{pzc}{m}{it}
+
+\usepackage{icomma}
+\usepackage{amssymb}
+
+\usefonttheme{professionalfonts}
+
+\usepackage{listings} 
+\lstset{
+  language=C++,
+%  basicstyle=\ttfamily\small,  
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{green!40!black}\itshape,
+  stringstyle=\color{red},
+  showstringspaces=false,
+  literate={ą}{{\k{a}}}1
+           {Ą}{{\k{A}}}1
+           {ć}{{\'c}}1
+           {Ć}{{\'C}}1
+           {ę}{{\k{e}}}1
+           {Ę}{{\k{E}}}1
+           {ł}{{\l{}}}1
+           {Ł}{{\L{}}}1
+           {ń}{{\'n}}1
+           {Ń}{{\'N}}1
+           {ó}{{\'o}}1
+           {Ó}{{\'O}}1
+           {ś}{{\'s}}1
+           {Ś}{{\'S}}1
+           {ż}{{\.z}}1
+           {Ż}{{\.Z}}1
+           {ź}{{\'z}}1
+           {Ź}{{\'Z}}1
+}
+
+\usepackage{tikz}  
+\usetikzlibrary{arrows,shapes,positioning,fit,backgrounds}
+
+\definecolor{myColorDepartment}{HTML}{163f8b}
+\definecolor{myColorDepartment2}{HTML}{11406e}
+
+\usecolortheme[named=myColorDepartment]{structure}
+
+\graphicspath{{../}}
+
+%\logo{\includegraphics[width=0.15\textwidth]{img/psk_logo.png}} 
+%\newcommand{\nologo}{\setbeamertemplate{logo}{}}
+
+	\AtBeginSubsection[]
+{
+	\begin{frame}
+        \frametitle{\secname}
+        \tableofcontents[sectionstyle=hide/hide,subsectionstyle=show/shaded/hide]
+    \end{frame}
+}
+
+\newcommand\imgwidth{0.65\textwidth}
+\newcommand{\figurewidth}{0.48}
+
+\setbeamertemplate{caption}[numbered]
+\setbeamerfont{caption}{size=\scriptsize}
+\setbeamerfont{caption name}{size=\scriptsize}
+
+%\setbeamerfont{bibliography entry author}{size=\tiny}
+%\setbeamerfont{bibliography entry title}{size=\tiny}
+%\setbeamerfont{bibliography entry journal}{size=\tiny}
+%\setbeamerfont{bibliography entry note}{size=\tiny}
+
+\def\figurename{Rys.}
+
+\usepackage[skip=3pt]{subcaption} 
+
+\usepackage{ifthen}
+\newboolean{ifpdfimg}  
+\setboolean{ifpdfimg}{false}
+
+\usepackage{multicol}
+\usepackage{makecell}
+
+\newcommand{\rvect}[1]{\begin{bmatrix} #1 \end{bmatrix}^T}
+\newcommand{\cvect}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+\newcommand{\cvector}[1]{\left[\begin{array}{c} #1 \end{array}\right]}
+
+
+\newcommand*{\unit}[2][\;]{\ensuremath{#1\mathrm{#2}}}
+\newcommand*{\unitb}[2][\;]{\ensuremath{#1\mathrm{[#2]}}}
+
+\newcommand*{\li}[1]{\ensuremath{{\,}^{\mathrm{#1}\!}}}
+
+\newcommand*{\coord}[2][]{\ensuremath{{#2}^{\mathrm{#1}}{}}}
+\newcommand*{\vect}[2][]{\ensuremath{\mathvec{#2}^{\mathrm{#1}}{}}}
+\newcommand*{\vecth}[2][]{\ensuremath{\mathvech{#2}^{\mathrm{#1}}{}}}
+
+\newcommand*{\axis}[2][]{\ensuremath{ \mathmatrix{#2}_{\mathrm{#1}}}}
+\newcommand*{\framexy}[3][]{\ensuremath{ \axis[#1]{#2} \axis[#1]{#3} }}
+\newcommand*{\frameXYZ}[4][]{\ensuremath{ \axis[#1]{#2} \axis[#1]{#3} \axis[#1]{#4}}}
+
+
+\newcommand{\source}[1]{\vspace{-6pt} \caption*{\hfill Źródło: {#1}}}
+
+\usepackage{textcomp, gensymb}
+
+\usepackage{multirow}
+\usepackage{booktabs}
+
+\newcommand{\head}[1]{%
+  \bfseries
+  \begin{tabular}{@{}c@{}}
+  \strut#1\strut
+  \end{tabular}%
+}
+
+%%	***	TODO LIST  ***
+%\usepackage{enumitem,amssymb}
+%\newlist{todolist}{itemize}{2}
+%\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\checked}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}\hspace{-2.5pt}}%
+\newcommand{\wontfix}{\rlap{$\square$}{\large\hspace{1pt}\xmark}}
+
+
+\usepackage{etoolbox}
+
+\makeatletter
+\patchcmd{\beamer@sectionintoc}{\vskip1.5em}{\vskip1.0em}{}{}
+\makeatother
+
+% Ustawienia dla listingów kodu
+\lstset{
+    language=C++,
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    frameround=tttt,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=true,
+    showstringspaces=false,
+    tabsize=4,
+    escapeinside={(*@}{@*)}
+}
+
+
+%\Huge
+%\huge
+%\LARGE
+%\Large
+%\large
+%\normalsize (domyślny)
+%\small
+%\footnotesize
+%\scriptsize
+%\tiny
+
+% w preambule
+\setbeamerfont{block title}{size=\small}
+\setbeamerfont{block body}{size=\small}
+
+\setbeamerfont{alertblock title}{size=\small}
+\setbeamerfont{alertblock body}{size=\small}
+
+\setbeamerfont{exampleblock title}{size=\small}
+\setbeamerfont{exampleblock body}{size=\small}

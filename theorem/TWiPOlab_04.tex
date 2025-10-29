@@ -1,0 +1,512 @@
+\documentclass[9pt]{beamer}
+
+\input{preamble}
+
+\title[Transformata Census]{Techniki Wizyjne i Przetwarzanie Obrazów}
+\subtitle{Laboratorium 4: Transformata Census}
+
+\begin{document}
+	
+\begin{frame}[plain]
+\titlepage
+\note{
+Witaj na czwartym laboratorium! Dziś poznasz transformatę Census - metodę reprezentacji lokalnych regionów obrazu w postaci ciągów binarnych.
+}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Plan laboratorium}
+\tableofcontents[hideallsubsections]
+\note{
+Transformata Census to potężne narzędzie w przetwarzaniu obrazów, szczególnie przydatne w stereo vision i detekcji zmian.
+}
+\end{frame}
+
+\section{Wprowadzenie teoretyczne}
+
+\subsection{Czym jest transformata Census?}
+
+\begin{frame}{Transformata Census - idea}
+\begin{block}{Definicja}
+\textbf{Transformata Census} to metoda reprezentacji lokalnych regionów obrazu w postaci ciągów binarnych poprzez porównanie wartości piksela centralnego z jego sąsiadami.
+\end{block}
+
+\pause
+
+\begin{block}{Zastosowania}
+\begin{itemize}
+\item \textbf{Stereo vision} - dopasowywanie punktów między obrazami
+\item \textbf{Detekcja zmian} - wykrywanie różnic w sekwencjach obrazów
+\item \textbf{Rozpoznawanie tekstur} - analiza struktury powierzchni
+\item \textbf{Tracking obiektów} - śledzenie obiektów w ruchu
+\end{itemize}
+\end{block}
+
+\pause
+
+\begin{alertblock}{Kluczowa zaleta}
+Transformata Census jest \textbf{odporna na zmiany oświetlenia}, ponieważ porównuje względne relacje między pikselami, a nie ich bezwzględne wartości.
+\end{alertblock}
+
+\note{
+Census to elegancka metoda, która zamienia lokalny region obrazu na ciąg bitów. Jest szybka, efektywna i odporna na zmiany oświetlenia.
+}
+\end{frame}
+
+\begin{frame}{Zasada działania}
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+% Okno 3x3
+\node[draw, rectangle, minimum width=4cm, minimum height=4cm, fill=blue!10] (window) at (0,0) {};
+\node[above=2mm of window] {\textbf{Okno 3×3}};
+
+% Piksel centralny
+\node[draw, circle, fill=red!30, minimum size=1cm] (center) at (0,0) {50};
+\node[below=-1mm of center] {\footnotesize centrum};
+
+% Sąsiedzi
+\node[draw, circle, fill=green!20, minimum size=0.8cm] at (-1.2,1.2) {45};
+\node[draw, circle, fill=green!20, minimum size=0.8cm] at (0,1.2) {60};
+\node[draw, circle, fill=green!20, minimum size=0.8cm] at (1.2,1.2) {30};
+\node[draw, circle, fill=green!20, minimum size=0.8cm] at (-1.2,0) {55};
+\node[draw, circle, fill=green!20, minimum size=0.8cm] at (1.2,0) {40};
+\node[draw, circle, fill=green!20, minimum size=0.8cm] at (-1.2,-1.2) {70};
+\node[draw, circle, fill=green!20, minimum size=0.8cm] at (0,-1.2) {35};
+\node[draw, circle, fill=green!20, minimum size=0.8cm] at (1.2,-1.2) {65};
+
+% Strzałka
+\draw[->, thick] (3,0) -- (5,0);
+
+% Wynik
+\node[draw, rectangle, minimum width=4cm, minimum height=4cm, fill=yellow!10] (result) at (8,0) {};
+\node[above=2mm of result] {\textbf{Porównanie}};
+
+\node[draw, circle, fill=red!30, minimum size=1cm] at (8,0) {X};
+\node[draw, circle, fill=blue!20, minimum size=0.8cm] at (6.8,1.2) {0};
+\node[draw, circle, fill=orange!30, minimum size=0.8cm] at (8,1.2) {1};
+\node[draw, circle, fill=blue!20, minimum size=0.8cm] at (9.2,1.2) {0};
+\node[draw, circle, fill=orange!30, minimum size=0.8cm] at (6.8,0) {1};
+\node[draw, circle, fill=blue!20, minimum size=0.8cm] at (9.2,0) {0};
+\node[draw, circle, fill=orange!30, minimum size=0.8cm] at (6.8,-1.2) {1};
+\node[draw, circle, fill=blue!20, minimum size=0.8cm] at (8,-1.2) {0};
+\node[draw, circle, fill=orange!30, minimum size=0.8cm] at (9.2,-1.2) {1};
+\end{tikzpicture}
+\end{center}
+
+\vspace{5mm}
+
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{Reguła:}
+\begin{itemize}
+\item Piksel $<$ centrum $\rightarrow$ bit = \textcolor{blue}{\textbf{0}}
+\item Piksel $\geq$ centrum $\rightarrow$ bit = \textcolor{orange}{\textbf{1}}
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Wynik:}
+\begin{itemize}
+\item Ciąg bitów: 01001001
+\item Wartość dziesiętna: 73
+\end{itemize}
+\end{column}
+\end{columns}
+
+\note{
+Dla każdego piksela porównujemy jego wartość z wartością centralną. Jeśli jest mniejsza - zapisujemy 0, jeśli większa lub równa - zapisujemy 1.
+}
+\end{frame}
+
+\subsection{Odczyt}
+
+\begin{frame}%{Odczyt spiralny}
+\begin{center}
+\begin{tikzpicture}[scale=1.2]
+% Siatka 3x3
+\draw[step=1cm, gray, very thin] (0,0) grid (3,3);
+
+% Numery pozycji
+\node at (0.5,2.5) {\Large 1};
+\node at (1.5,2.5) {\Large 2};
+\node at (2.5,2.5) {\Large 3};
+\node at (2.5,1.5) {\Large 4};
+\node at (2.5,0.5) {\Large 5};
+\node at (1.5,0.5) {\Large 6};
+\node at (0.5,0.5) {\Large 7};
+\node at (0.5,1.5) {\Large 8};
+\node at (1.5,1.5) {\Large \textcolor{red}{X}};
+
+% Strzałki pokazujące kierunek
+\draw[->, thick, blue] (0.5,2.8) -- (1.3,2.8);
+\draw[->, thick, blue] (1.7,2.8) -- (2.5,2.8);
+\draw[->, thick, blue] (2.8,2.5) -- (2.8,1.7);
+\draw[->, thick, blue] (2.8,1.3) -- (2.8,0.5);
+\draw[->, thick, blue] (2.5,0.2) -- (1.7,0.2);
+\draw[->, thick, blue] (1.3,0.2) -- (0.5,0.2);
+\draw[->, thick, blue] (0.2,0.5) -- (0.2,1.3);
+\end{tikzpicture}
+\end{center}
+
+\begin{block}{Zalety odczytu spiralnego}
+\begin{itemize}
+\item \textbf{Niezmienniczość względem obrotów} - łatwiejsza analiza obrazów obróconych
+\item \textbf{Ciągłość przestrzenna} - sąsiednie bity reprezentują sąsiednie piksele
+\item \textbf{Uniwersalność} - działa dla dowolnego rozmiaru okna (3×3, 5×5, 7×7, ...)
+\end{itemize}
+\end{block}
+
+\begin{alertblock}{Uwaga}
+Odczyt wierszami jest prostszy w implementacji, ale odczyt „ślimakiem" daje lepsze właściwości dla analizy obrotów obrazu.
+\end{alertblock}
+
+\note{
+Odczyt spiralny to kluczowa różnica w stosunku do prostego odczytu wierszami. Pozwala na lepszą analizę obrazów obróconych.
+}
+\end{frame}
+
+\begin{frame}[fragile]{Przykład krok po kroku}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{Obraz wejściowy:}
+\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily]
+45  60  30
+55  50  40
+70  35  65
+\end{lstlisting}
+
+\vspace{3mm}
+
+\textbf{Centrum:} 50
+
+\vspace{3mm}
+
+\textbf{Kolejność odczytu:}
+\begin{enumerate}
+\footnotesize
+\item 45 $<$ 50 $\rightarrow$ 0
+\item 60 $\geq$ 50 $\rightarrow$ 1
+\item 30 $<$ 50 $\rightarrow$ 0
+\item 40 $<$ 50 $\rightarrow$ 0
+\item 65 $\geq$ 50 $\rightarrow$ 1
+\item 70 $\geq$ 50 $\rightarrow$ 1
+\item 55 $\geq$ 50 $\rightarrow$ 1
+\item 35 $<$ 50 $\rightarrow$ 0
+\end{enumerate}
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Wynik:}
+
+\vspace{3mm}
+
+Ciąg bitów: \texttt{01001110}
+
+\vspace{3mm}
+
+Wartość dziesiętna: \textbf{78}
+
+\vspace{5mm}
+
+\begin{alertblock}{Interpretacja}
+Liczba 78 to \textbf{deskryptor} tego fragmentu obrazu. Możemy go porównywać z innymi deskryptorami używając odległości Hamminga.
+\end{alertblock}
+\end{column}
+\end{columns}
+
+\note{
+To konkretny przykład pokazujący jak krok po kroku obliczamy transformatę Census dla jednego piksela.
+}
+\end{frame}
+
+\section{Odległość Hamminga}
+
+\subsection{Definicja i zastosowanie}
+
+\begin{frame}{Odległość Hamminga}
+\begin{block}{Definicja}
+\textbf{Odległość Hamminga} to liczba pozycji, na których dwa ciągi binarne o tej samej długości się różnią.
+\end{block}
+
+\pause
+
+\begin{exampleblock}{Przykład}
+\begin{center}
+\begin{tabular}{lcl}
+Ciąg 1: & \texttt{01001001} & \\
+Ciąg 2: & \texttt{01\textcolor{red}{1}0100\textcolor{red}{0}} & \\
+\hline
+Różnice: & \multicolumn{2}{c}{\textcolor{red}{2 pozycje (bit 3 i bit 7)}} \\
+\end{tabular}
+\end{center}
+
+Odległość Hamminga = \textbf{2}
+\end{exampleblock}
+
+\pause
+
+\begin{block}{Zastosowanie w Census}
+\begin{itemize}
+\item \textbf{Mała odległość} ($\approx$ 0-5) $\rightarrow$ regiony są \textbf{podobne}
+\item \textbf{Średnia odległość} ($\approx$ 6-15) $\rightarrow$ regiony \textbf{częściowo podobne}
+\item \textbf{Duża odległość} ($>$ 15) $\rightarrow$ regiony są \textbf{różne}
+\end{itemize}
+\end{block}
+
+\note{
+Odległość Hamminga to prosta, ale potężna metryka do porównywania ciągów bitowych. Im mniejsza odległość, tym bardziej podobne są regiony obrazu.
+}
+\end{frame}
+
+
+
+\section{Zadania do wykonania}
+
+\subsection{Przegląd zadań}
+
+\begin{frame}{Zadania laboratoryjne}
+\begin{block}{Zadanie 1: Transformata Census dla pojedynczego piksela}
+Zaimplementuj funkcję \texttt{census\_pixel(image, x, y, window\_size)} obliczającą wartość Census dla jednego piksela.
+\end{block}
+
+\pause
+
+\begin{block}{Zadanie 2: Transformata Census dla całego obrazu}
+Zaimplementuj funkcję \texttt{census\_transform(image, window\_size)} obliczającą Census dla wszystkich pikseli obrazu (z pominięciem brzegów).
+\end{block}
+
+\pause
+
+\begin{block}{Zadanie 3: Odległość Hamminga}
+Zaimplementuj funkcję \texttt{hamming\_distance(a, b)} obliczającą liczbę różniących się bitów.
+\end{block}
+
+\pause
+
+\begin{block}{Zadanie 4: Mapa podobieństwa}
+Zaimplementuj funkcję \texttt{similarity\_map(image1, image2, window\_size)} tworzącą mapę różnic między dwoma obrazami.
+\end{block}
+
+\pause
+
+\begin{block}{Zadanie 5: Wyszukiwanie wzorca}
+Zaimplementuj funkcję \texttt{find\_pattern(image, template, window\_size, threshold)} wyszukującą wzorzec na obrazie.
+\end{block}
+
+\note{
+Pięć zadań o rosnącym stopniu trudności. Każde kolejne wykorzystuje poprzednie funkcje.
+}
+\end{frame}
+
+\subsection{Wskazówki implementacyjne}
+
+
+
+\begin{frame}[fragile]{Zadanie 1: Wskazówki}
+\begin{block}{Struktura funkcji \texttt{census\_pixel}}
+%\onslide<1>
+\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily]
+def census_pixel(image, x, y, window_size=3):
+    # TODO: Zaimplementuj obliczanie transformaty Census dla pojedynczego piksela
+    # 1. Oblicz promień okna: radius = window_size // 2
+    # 2. Pobierz wartość piksela centralnego
+    # 3. Zainicjuj census_value = 0
+    # 4. Dla każdego sąsiada w oknie:
+    #    - Przesuń census_value o 1 bit w lewo
+    #    - Jeśli sąsiad >= centrum, dodaj 1 (census_value |= 1)
+    # 5. Zwróć census_value
+    offset = window_size // 2
+    center_value = image[y,x]
+    census_value = 0
+    
+    for dy in range(-offset, offset +1):
+        for dx in range(-offset, offset +1):
+            if dy == 0 and dx == 0:
+                continue
+
+            census_value <<= 1
+            
+            if image[y+dy, x+dx] >= center_value:
+                census_value |= 1
+    return census_value
+\end{lstlisting}
+\end{block}
+
+%\onslide<2>
+\begin{alertblock}{Kluczowe operacje bitowe}
+\begin{itemize}
+\item \texttt{<<=} - przesunięcie bitowe w lewo (zrobienie miejsca na nowy bit)
+\item \texttt{|=} - bitowe OR (ustawienie bitu na 1)
+\end{itemize}
+\end{alertblock}
+
+
+\end{frame}
+
+\begin{frame}[fragile]{Zadanie 2: Wskazówki}
+\begin{block}{Struktura funkcji \texttt{census\_transform}}
+\begin{lstlisting}[language=Python]%, basicstyle=\tiny\ttfamily]
+def census_transform(image, window_size=3):
+    # TODO: Zaimplementuj transformatę Census dla całego obrazu
+    # 1. Utwórz macierz wynikową wypełnioną zerami (dtype=np.uint64)
+    # 2. Oblicz promień okna
+    # 3. Dla każdego piksela (z pominięciem brzegów):
+    #    - Wywołaj census_pixel i zapisz wynik
+    # 4. Zwróć macierz wynikową
+    rows,cols = image.shape
+    census = np.zeros((rows, cols), dtype=np.uint64)
+    offset = window_size // 2
+
+    for y in range(offset, rows - offset):
+        for x in range(offset, cols - offset):
+            census[y, x] = census_pixel(image, x, y, window_size)
+
+    return census
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+
+\begin{frame}[fragile]{Zadanie 3: Wskazówki}
+\begin{lstlisting}[language=Python, caption={Prosta implementacja w Pythonie}]
+def hamming_distance(a, b):
+    """
+    Oblicza odległość Hamminga między dwoma liczbami.
+    
+    Parametry:
+    a, b - liczby całkowite (reprezentacje Census)
+    
+    Zwraca:
+    int - liczba różniących się bitów
+    """
+    xor_result = a ^ b  # XOR - różnice bitów
+    return bin(xor_result).count('1')  # Zlicz jedynki
+
+# Przykład użycia
+census1 = 0b01001001  # 73
+census2 = 0b01101000  # 104
+distance = hamming_distance(census1, census2)
+print(f"Odległość Hamminga: {distance}")  # Wynik: 2
+\end{lstlisting}
+
+\begin{alertblock}{Kluczowa operacja}
+Operator \texttt{XOR} (\texttt{\^}) zwraca 1 tam, gdzie bity się różnią, i 0 tam, gdzie są takie same.
+\end{alertblock}
+\end{frame}
+
+
+\begin{frame}[fragile]{Zadanie 4: Mapa podobieństwa}
+\begin{block}{Idea}
+Dla każdego piksela oblicz odległość Hamminga między wartościami Census z dwóch obrazów. Im większa odległość, tym większa różnica.
+\end{block}
+
+\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily, caption={Szkielet funkcji}]
+def similarity_map(image1, image2, window_size=3):
+    # 1. Oblicz Census dla obu obrazów
+    census1 = census_transform(image1, window_size)
+    census2 = census_transform(image2, window_size)
+    
+    # 2. Utwórz mapę różnic
+    similarity = np.zeros_like(census1, dtype=np.uint8)
+    
+    # 3. Dla każdego piksela oblicz odległość Hamminga
+    for y in range(census1.shape[0]):
+        for x in range(census1.shape[1]):
+            similarity[y, x] = hamming_distance(
+                census1[y, x], census2[y, x]
+            )
+    
+    return similarity
+\end{lstlisting}
+
+\begin{exampleblock}{Wizualizacja}
+Jasne piksele = duże różnice, ciemne piksele = małe różnice
+\end{exampleblock}
+
+\note{
+Mapa podobieństwa to wizualizacja różnic między obrazami. Przydatna do detekcji zmian.
+}
+\end{frame}
+
+\begin{frame}[fragile]{Zadanie 5: Wyszukiwanie wzorca}
+\begin{block}{Algorytm sliding window}
+\begin{enumerate}
+\item Oblicz Census dla obrazu i wzorca
+\item Przesuń wzorzec po całym obrazie
+\item Dla każdej pozycji oblicz średnią odległość Hamminga
+\item Zwróć pozycje, gdzie odległość $<$ threshold
+\end{enumerate}
+\end{block}
+
+\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily, caption={Fragment kluczowy}]
+# Wytnij fragment obrazu o rozmiarze wzorca
+region = census_img[y:y+tpl_h, x:x+tpl_w]
+
+# Oblicz średnią odległość Hamminga
+total_distance = 0
+count = 0
+for ty in range(tpl_h):
+    for tx in range(tpl_w):
+        total_distance += hamming_distance(
+            region[ty, tx], census_tpl[ty, tx]
+        )
+        count += 1
+
+avg_distance = total_distance / count
+if avg_distance < threshold:
+    matches.append((x, y, avg_distance))
+\end{lstlisting}
+
+\note{
+To najbardziej zaawansowane zadanie. Wymaga zrozumienia wszystkich poprzednich koncepcji.
+}
+\end{frame}
+
+\section{Podsumowanie}
+
+\begin{frame}{Co dziś osiągniesz?}
+\begin{block}{Wiedza teoretyczna}
+\begin{itemize}
+\item Rozumiesz ideę transformaty Census
+\item Znasz różnicę między odczytem wierszowym a spiralnym
+\item Wiesz czym jest odległość Hamminga i jak ją stosować
+\item Rozumiesz zastosowania Census w przetwarzaniu obrazów
+\end{itemize}
+\end{block}
+
+\begin{block}{Umiejętności praktyczne}
+\begin{itemize}
+\item Potrafisz zaimplementować transformatę Census
+\item Umiesz obliczać odległość Hamminga
+\item Potrafisz tworzyć mapy podobieństwa między obrazami
+\item Umiesz wyszukiwać wzorce na obrazach
+\end{itemize}
+\end{block}
+
+\begin{alertblock}{Kluczowa zaleta Census}
+Transformata Census jest \textbf{odporna na zmiany oświetlenia}, co czyni ją idealną do porównywania obrazów w różnych warunkach.
+\end{alertblock}
+
+\note{
+Transformata Census to potężne narzędzie. Dziś nauczyłeś się zarówno teorii, jak i praktycznej implementacji.
+}
+\end{frame}
+
+\begin{frame}{Pytania i odpowiedzi}
+\begin{center}
+\Huge Pytania?
+
+\vspace{1cm}
+
+\Large Powodzenia w implementacji!
+
+\vspace{1cm}
+
+\normalsize
+Materiały dostępne na:
+\texttt{https://github.com/kbor89/TWiPO}
+\end{center}
+
+\note{
+Czas na pytania studentów. Upewnij się, że wszyscy rozumieją podstawowe koncepcje przed rozpoczęciem pracy.
+}
+\end{frame}
+
+\end{document}
